@@ -1,0 +1,49 @@
+#!/usr/bin/python3
+
+import re, sys, subprocess
+
+usage = "Usage: findos <IPv4 address>"
+help_usage = "Bad IPv4 address. Example: 123.123.123.123"
+address_pattern = re.compile("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
+windows_ttl = 128
+linux_ttl = 64
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def main(argv):
+	address = argv[0]
+	address_matched = address_pattern.match(address)
+
+	if address_matched:
+		cmd = "ping -c1 " + address + " | head -n2 | tail -n1 | awk '{print $6}' | cut -d '=' -f 2"
+		ttl = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		if "Unreachable" not in str(ttl.stdout):
+			ttl = int(str(ttl.stdout)[2:-3])
+			
+			if ttl > windows_ttl:
+				print(bcolors.WARNING + "[!] " + bcolors.ENDC +"unknown")
+			elif ttl > linux_ttl and ttl <= windows_ttl:
+				print(bcolors.OKGREEN + "[+] " + bcolors.ENDC + "windows")
+			elif ttl <= linux_ttl:
+				print(bcolors.OKGREEN + "[+] " + bcolors.ENDC + "linux")
+		else:
+			print(bcolors.FAIL + "[-] " + bcolors.ENDC + "Unreachable ip address")
+
+	else:
+		print(bcolors.FAIL + "[-] " + bcolors.ENDC + help_usage)
+
+if __name__ == "__main__":
+	if len(sys.argv) == 2:
+		main(sys.argv[1:])
+	else:
+		print(bcolors.WARNING + "[!] " + bcolors.ENDC + usage)
