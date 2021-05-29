@@ -32,7 +32,7 @@ def main(argv):
 		if "Unreachable" not in str(ttl.stdout):
 			ttl = int(str(ttl.stdout)[2:-3])
 			if ttl > solaris_ttl:
-				print(bcolors.WARNING + "[!] " + bcolors.ENDC +"unknown")L
+				print(bcolors.WARNING + "[!] " + bcolors.ENDC +"unknown")
 			if ttl > windows_ttl and ttl <= solaris_ttl:
 				print(bcolors.OKGREEN + "[+] " + bcolors.ENDC +"solaris")
 			elif ttl > linux_ttl and ttl <= windows_ttl:
